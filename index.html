@@ -1,8 +1,51 @@
 <div class="datetime-box" id="datetimeBox">
-  <span id="date">--/--/----</span>
-  <span id="time">--:--:--</span>
+  <span id="date">--/--/----</span><br>
+  <span id="time">--:--:--</span><br>
   <span id="weekday">---</span>
 </div>
+
+<style>
+#datetimeBox {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #333;
+  border-radius: 20px;
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  transition: background 0.5s, color 0.5s, box-shadow 0.5s;
+  background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%);
+  color: #000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2), 0 0 40px rgba(255,255,255,0.15) inset;
+
+  /* 呼吸动画 */
+  animation: glow 6s ease-in-out infinite;
+}
+
+/* 秒表微光 */
+#time {
+  animation: pulse 1s infinite;
+}
+
+/* 微弱的呼吸光 */
+@keyframes glow {
+  0%   { box-shadow: 0 0 15px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.15) inset; }
+  50%  { box-shadow: 0 0 30px rgba(255,255,255,0.35), 0 0 60px rgba(255,255,255,0.2) inset; }
+  100% { box-shadow: 0 0 15px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.15) inset; }
+}
+
+/* 每秒轻微闪一下 */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.65; }
+  100% { opacity: 1; }
+}
+</style>
 
 <script>
 // -------------------- 时间显示 --------------------
@@ -17,22 +60,22 @@ function updateDateTime() {
   document.getElementById('time').textContent = time;
   document.getElementById('weekday').textContent = weekday;
 }
+
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
 // -------------------- 天气相关 CSS --------------------
 const weatherStyles = {
-  Clear: { background: 'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%)', color: '#000' }, // 蓝天白云
-  Clouds: { background: 'linear-gradient(180deg, #B0B0B0 0%, #808080 100%)', color: '#000' }, // 阴天
-  Rain: { background: 'linear-gradient(180deg, #4a4a4a 0%, #2F4F4F 100%)', color: '#fff' },  // 雨天
-  Drizzle: { background: 'linear-gradient(180deg, #6E7B8B 0%, #4F6272 100%)', color: '#fff' },
-  Thunderstorm: { background: 'linear-gradient(180deg, #3B3B3B 0%, #1C1C1C 100%)', color: '#fff' },
-  Snow: { background: 'linear-gradient(180deg, #E0F7FA 0%, #B2EBF2 100%)', color: '#000' },
-  Mist: { background: 'linear-gradient(180deg, #CFCFCF 0%, #9E9E9E 100%)', color: '#000' }
+  Clear: { background: 'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%)', color: '#000', shadow: '0 0 20px rgba(0,0,0,0.2), 0 0 40px rgba(255,255,255,0.15) inset' },
+  Clouds: { background: 'linear-gradient(180deg, #B0B0B0 0%, #808080 100%)', color: '#000', shadow: '0 0 20px rgba(0,0,0,0.25), 0 0 30px rgba(255,255,255,0.1) inset' },
+  Rain: { background: 'linear-gradient(180deg, #4a4a4a 0%, #2F4F4F 100%)', color: '#fff', shadow: '0 0 25px rgba(0,0,0,0.5), 0 0 35px rgba(255,255,255,0.1) inset' },
+  Drizzle: { background: 'linear-gradient(180deg, #6E7B8B 0%, #4F6272 100%)', color: '#fff', shadow: '0 0 20px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.1) inset' },
+  Thunderstorm: { background: 'linear-gradient(180deg, #3B3B3B 0%, #1C1C1C 100%)', color: '#fff', shadow: '0 0 30px rgba(0,0,0,0.6), 0 0 50px rgba(255,255,255,0.1) inset' },
+  Snow: { background: 'linear-gradient(180deg, #E0F7FA 0%, #B2EBF2 100%)', color: '#000', shadow: '0 0 20px rgba(0,0,0,0.2), 0 0 35px rgba(255,255,255,0.2) inset' },
+  Mist: { background: 'linear-gradient(180deg, #CFCFCF 0%, #9E9E9E 100%)', color: '#000', shadow: '0 0 15px rgba(0,0,0,0.2), 0 0 25px rgba(255,255,255,0.1) inset' }
 };
 
 // -------------------- 获取 Johor Gelang Patah 天气 --------------------
-// 需要去 OpenWeatherMap 注册一个免费 API key
 const API_KEY = '106fb15a4ef997d52cb68b6eea919e07';
 const CITY = 'Gelang Patah,MY';
 const datetimeBox = document.getElementById('datetimeBox');
@@ -41,18 +84,19 @@ async function fetchWeatherAndUpdateStyle() {
   try {
     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`);
     const data = await res.json();
-    const weather = data.weather[0].main; // 天气主类型：Clear, Clouds, Rain...
+    const weather = data.weather[0].main;
 
     const style = weatherStyles[weather] || weatherStyles.Clear;
     datetimeBox.style.background = style.background;
     datetimeBox.style.color = style.color;
+    datetimeBox.style.boxShadow = style.shadow;
 
   } catch (e) {
     console.error('Weather API fetch failed:', e);
   }
 }
 
-// 初始调用 & 每 30 分钟刷新一次
 fetchWeatherAndUpdateStyle();
-setInterval(fetchWeatherAndUpdateStyle, 1 * 5 * 1000);
+setInterval(fetchWeatherAndUpdateStyle, 1 * 15 * 1000);
 </script>
+
