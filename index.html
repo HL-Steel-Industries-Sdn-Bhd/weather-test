@@ -1,0 +1,58 @@
+<div class="datetime-box" id="datetimeBox">
+  <span id="date">--/--/----</span>
+  <span id="time">--:--:--</span>
+  <span id="weekday">---</span>
+</div>
+
+<script>
+// -------------------- 时间显示 --------------------
+function updateDateTime() {
+  const now = new Date();
+  const options = { weekday: 'long' };
+  const date = now.toLocaleDateString('en-GB');
+  const time = now.toLocaleTimeString('en-US');
+  const weekday = now.toLocaleDateString('en-GB', options);
+
+  document.getElementById('date').textContent = date;
+  document.getElementById('time').textContent = time;
+  document.getElementById('weekday').textContent = weekday;
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+// -------------------- 天气相关 CSS --------------------
+const weatherStyles = {
+  Clear: { background: 'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%)', color: '#000' }, // 蓝天白云
+  Clouds: { background: 'linear-gradient(180deg, #B0B0B0 0%, #808080 100%)', color: '#000' }, // 阴天
+  Rain: { background: 'linear-gradient(180deg, #4a4a4a 0%, #2F4F4F 100%)', color: '#fff' },  // 雨天
+  Drizzle: { background: 'linear-gradient(180deg, #6E7B8B 0%, #4F6272 100%)', color: '#fff' },
+  Thunderstorm: { background: 'linear-gradient(180deg, #3B3B3B 0%, #1C1C1C 100%)', color: '#fff' },
+  Snow: { background: 'linear-gradient(180deg, #E0F7FA 0%, #B2EBF2 100%)', color: '#000' },
+  Mist: { background: 'linear-gradient(180deg, #CFCFCF 0%, #9E9E9E 100%)', color: '#000' }
+};
+
+// -------------------- 获取 Johor Gelang Patah 天气 --------------------
+// 需要去 OpenWeatherMap 注册一个免费 API key
+const API_KEY = '106fb15a4ef997d52cb68b6eea919e07';
+const CITY = 'Gelang Patah,MY';
+const datetimeBox = document.getElementById('datetimeBox');
+
+async function fetchWeatherAndUpdateStyle() {
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`);
+    const data = await res.json();
+    const weather = data.weather[0].main; // 天气主类型：Clear, Clouds, Rain...
+
+    const style = weatherStyles[weather] || weatherStyles.Clear;
+    datetimeBox.style.background = style.background;
+    datetimeBox.style.color = style.color;
+
+  } catch (e) {
+    console.error('Weather API fetch failed:', e);
+  }
+}
+
+// 初始调用 & 每 30 分钟刷新一次
+fetchWeatherAndUpdateStyle();
+setInterval(fetchWeatherAndUpdateStyle, 300 * 60 * 1000);
+</script>
